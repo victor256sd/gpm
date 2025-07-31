@@ -1,14 +1,9 @@
-asyncio
 openai
 openai-agents
 openpyxl
 pandas
+pandasai
 pathlib
-pillow
-pillow-heif
-PyPDF2
-pytesseract
-requests
 streamlit
 streamlit-authenticator
 tiktoken
