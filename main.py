@@ -4,7 +4,6 @@ import openai
 from openai import OpenAI
 from openai import AsyncOpenAI
 from agents import Agent, ItemHelpers, MessageOutputItem, Runner, FileSearchTool, function_tool, trace
-import asyncio
 import os
 import pandas as pd
 import openpyxl
@@ -14,11 +13,11 @@ import time
 import yaml
 from yaml.loader import SafeLoader
 from pathlib import Path
-from PyPDF2 import PdfReader, PdfWriter
-from PIL import Image
-import pytesseract
 from cryptography.fernet import Fernet
 import re
+import numpy as np
+from pandasai import PandasAI
+from pandasai.llm.openai import OpenAI
 
 # Wait until run process completion.
 def wait_on_run(client, run, thread):
