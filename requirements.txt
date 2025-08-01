@@ -1,9 +1,6 @@
-openai
-openai-agents
 openpyxl
 pandas
 pandasai
 pathlib
 streamlit
 streamlit-authenticator
-tiktoken
