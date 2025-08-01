@@ -110,7 +110,7 @@ if st.session_state.get('authentication_status'):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
                 if submit_doc_ex and doc_ex:
                     # Prep data for mapping and map.
-                    data = pre_map(df)
+                    data = map_prep(df)
                     st.title("Quickmap")
                     st.map(data)
 
