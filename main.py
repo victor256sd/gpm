@@ -133,39 +133,27 @@ def extract_text_from_excel(uploaded_file):
         file.write(serialized_data)
     file.close()
     return output_filename
-
-def copy_pdf(uploaded_file):
-    # Specify the input and output file paths
-    input_pdf_path = uploaded_file
-    output_pdf_path = "temp.pdf"
-    # Read the input PDF
-    reader = PdfReader(input_pdf_path)    
-    # Create a writer object to write the copy
-    writer = PdfWriter()
-    # Add all pages from the input PDF to the writer
-    for page in reader.pages:
-        writer.add_page(page)
-    # Write the copied content to the output file
-    with open(output_pdf_path, "wb") as output_file:
-        writer.write(output_file)    
-    output_file.close()
-    return output_pdf_path
-
-def convert_image_to_pdf(uploaded_file):
-    output_file = "temp.txt"
-    # Open the image file
-    image = Image.open(uploaded_file)
-    # Extract text from the image using pytesseract
-    extracted_text = pytesseract.image_to_string(image)
-    # Write the copied content to the output file
-    with open(output_file, "w") as file:
-        file.write(extracted_text)
-    file.close()
-    return output_file
     
 # Disable the button called via on_click attribute.
 def disable_button():
     st.session_state.disabled = True        
+
+def read_file():
+    # Read the input file again and load the file into the
+    # pandas data frame df1.
+    if pathlib.Path(str_filepath).suffix == ".xlsx":
+        df1 = pandas.read_excel(str_filepath)
+    elif pathlib.Path(str_filepath).suffix == ".csv":
+        df1 = pandas.read_csv(str_filepath, engine='python')    
+
+def map_it():
+    llm = OpenAI(api_token="API_KEY")
+    pandas_ai = PandasAI(llm, conversational=False)
+
+    response = pandas_ai(df, "What is the index of Pune?")
+    response = pandas_ai(df, "Show the first 5 rows of data in tabular form")
+
+
 
 # Definitive CSS selectors for Streamlit 1.45.1+
 st.markdown("""
@@ -202,9 +190,9 @@ if st.session_state.get('authentication_status'):
     # Model list, Vector store ID, assistant IDs (one for initial upload eval, 
     # the second for follow-up user questions).
     MODEL_LIST = ["gpt-4o-mini", "gpt-4.1-nano", "gpt-4.1-mini", "gpt-4.1"] #, "o4-mini"]
-    VECTOR_STORE_ID = st.secrets["VECTOR_STORE_ID"]
-    MATH_ASSISTANT_ID = st.secrets["MATH_ASSISTANT_ID"]
-    MATH_ASSISTANT2_ID = st.secrets["MATH_ASSISTANT2_ID"]
+    # VECTOR_STORE_ID = st.secrets["VECTOR_STORE_ID"]
+    # MATH_ASSISTANT_ID = st.secrets["MATH_ASSISTANT_ID"]
+    # MATH_ASSISTANT2_ID = st.secrets["MATH_ASSISTANT2_ID"]
     
     # Set page layout and title.
     st.set_page_config(page_title="Threat AI", page_icon=":spider:", layout="wide")
