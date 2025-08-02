@@ -33,8 +33,8 @@ def map_prep(df):
     lat = pandas_ai.run(df, prompt="Find the column representing latitude (regardless of its exact name), convert all its values to decimal degrees if needed, and return the result as a list.")
     lon = pandas_ai.run(df, prompt=INSTRUCTION_LON)
 
-    st.write(type(lat),lat)
-    st.write(type(lon),lon)
+    st.write(lat)
+    st.write(lon)
     
     data = pd.DataFrame({'lat': lat, 'lon': lon})
     
