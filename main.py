@@ -33,16 +33,7 @@ def map_prep(df):
     lat = pandas_ai.run(df, prompt="What are the latitude coordinates?")
     lon = pandas_ai.run(df, prompt="What are the longitude coordinates?")
     
-    # Sample data: Latitude and Longitude
-    data = pd.DataFrame({
-        'lat': [lat],
-        'lon': [lon]
-    })
-
-    rename_dict = {}
-    rename_dict[0] = 'lat'
-    rename_dict[1] = 'lon'
-    data = data.rename(columns=rename_dict)
+    data = pd.DataFrame({'lat': lat, 'lon': lon})
     
     # Convert columns to numeric, forcing non-convertible values to NaN
     data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
