@@ -33,15 +33,14 @@ def map_prep(df):
     lat = pandas_ai.run(df, prompt="What are the latitude coordinates?")
     lon = pandas_ai.run(df, prompt="What are the longitude coordinates?")
 
-    st.write(lat)
-    st.write(lon)
-    
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
         'lat': [lat],
         'lon': [lon]
     })
 
+    st.write(data.dtypes)
+    
     return data
 
 # Definitive CSS selectors for Streamlit 1.45.1+
