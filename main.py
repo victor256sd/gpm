@@ -30,7 +30,7 @@ def map_prep(df):
     INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
 
-    st.write(INSTRUCTION_LAT)
+    st.write(type(INSTRUCTION_LAT),INSTRUCTION_LAT)
     
     lat = pandas_ai(df, INSTRUCTION_LAT)
     lon = pandas_ai(df, INSTRUCTION_LON)
