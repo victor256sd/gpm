@@ -116,7 +116,7 @@ if st.session_state.get('authentication_status'):
                     # Prep data for mapping and map.
                     data = map_prep(df)
                     st.title(uploaded_file.name)
-                    st.map(data)
+                    st.map(data,size=100)
 
 elif st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
