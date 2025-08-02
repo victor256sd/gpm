@@ -39,7 +39,12 @@ def map_prep(df):
         'lon': [lon]
     })
 
-    st.write(data.dtypes)
+    # Convert columns to numeric, forcing non-convertible values to NaN
+    data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
+    data['lon'] = pd.to_numeric(data['lon'], errors='coerce')
+    
+    # Drop rows where conversion failed (so we only keep real coordinates)
+    data = data.dropna(subset=['lat', 'lon'])    
     
     return data
 
