@@ -35,8 +35,8 @@ def map_prep(df):
     
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
-        'lat': lat,
-        'lon': lon
+        'lat': [lat],
+        'lon': [lon]
     })
 
     return data
