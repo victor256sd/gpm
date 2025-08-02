@@ -30,7 +30,7 @@ def map_prep(df):
     INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
     
-    lat = pandas_ai.run(df, prompt="Find the column representing latitude (regardless of its exact name), convert all its values to decimal degrees if needed, and return the result as a list.")
+    lat = pandas_ai.run(df, prompt="Find the column representing latitude (regardless of its exact name), convert all its values to decimal degrees if needed, and return the result.")
     lon = pandas_ai.run(df, prompt=INSTRUCTION_LON)
 
     st.write(lat)
