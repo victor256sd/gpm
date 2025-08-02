@@ -33,8 +33,8 @@ def map_prep(df):
     lat = pandas_ai.run(df, prompt=INSTRUCTION_LAT)
     lon = pandas_ai.run(df, prompt=INSTRUCTION_LON)
 
-    st.write(type(lat),lat)
-    st.write(type(lon),lon)
+    st.write(lat)
+    st.write(lon)
     
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
