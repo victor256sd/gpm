@@ -10,7 +10,6 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
-from pandasai import Agent
     
 # Disable the button called via on_click attribute.
 def disable_button():
@@ -19,7 +18,7 @@ def disable_button():
 def map_prep(df):
     openai_api_key = st.secrets["OPENAI_API_KEY"]
     llm = OpenAI(api_token=openai_api_key)
-    pandas_llm = PandasAI(llm, conversational=False)
+    pandas_ai = PandasAI(llm, conversational=False)
 
     lat = []
     lon = []
@@ -31,12 +30,8 @@ def map_prep(df):
     INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
     
-    # convert to SmartDataframe
-    sdf = Agent(df)
-
-    lat = sdf.chat(INSTRUCTION_LAT)
-    lat = pandas_llm(df, INSTRUCTION_LAT)
-    lon = pandas_llm(df, INSTRUCTION_LON)
+    lat = pandas_ai.run(df, prompt=INSTRUCTION_LAT)
+    lon = pandas_ai.run(df, prompt=INSTRUCTION_LON)
     
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
