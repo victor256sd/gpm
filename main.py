@@ -40,8 +40,8 @@ def map_prep(df):
     })
 
     rename_dict = {}
-    rename_dict[lat_col] = 'lat'
-    rename_dict[lon_col] = 'lon'
+    rename_dict[0] = 'lat'
+    rename_dict[1] = 'lon'
     data = data.rename(columns=rename_dict)
     
     # Convert columns to numeric, forcing non-convertible values to NaN
