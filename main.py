@@ -29,6 +29,9 @@ def map_prep(df):
     f = Fernet(key)
     INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
+
+    st.write(df.head())
+    st.write(INSTRUCTION_LAT)
     
     lat = pandas_ai(df, INSTRUCTION_LAT)
     lon = pandas_ai(df, INSTRUCTION_LON)
@@ -111,11 +114,10 @@ if st.session_state.get('authentication_status'):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
                 if submit_doc_ex and doc_ex:
                     # Prep data for mapping and map.
-                    print(df.head())
-                    
-                    # data = map_prep(df)
-                    # st.title("Quickmap")
-                    # st.map(data)
+                    st.write(df.head())                    
+                    data = map_prep(df)
+                    st.title(uploaded_file.name)
+                    st.map(data)
 
 elif st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
