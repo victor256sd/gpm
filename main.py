@@ -18,7 +18,7 @@ def disable_button():
 def map_prep(df):
     openai_api_key = st.secrets["OPENAI_API_KEY"]
     llm = OpenAI(api_token=openai_api_key)
-    pandas_ai = PandasAI(llm, conversational=False)
+    pandas_llm = PandasAI(llm, conversational=False)
 
     lat = []
     lon = []
@@ -30,8 +30,8 @@ def map_prep(df):
     INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
     
-    lat = pandas_ai(df, "Identify the column containing latitude coordinates")
-    lon = pandas_ai(df, INSTRUCTION_LON)
+    lat = pandas_llm(df, "Identify the column containing latitude coordinates")
+    lon = pandas_llm(df, INSTRUCTION_LON)
     
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
