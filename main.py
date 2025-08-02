@@ -39,6 +39,8 @@ def map_prep(df):
         'lon': [lon]
     })
 
+    st.write(data)
+    
     # Convert columns to numeric, forcing non-convertible values to NaN
     data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
     data['lon'] = pd.to_numeric(data['lon'], errors='coerce')
@@ -46,6 +48,7 @@ def map_prep(df):
     # Drop rows where conversion failed (so we only keep real coordinates)
     data = data.dropna(subset=['lat', 'lon'])    
     
+    st.write(data)
     return data
 
 # Definitive CSS selectors for Streamlit 1.45.1+
