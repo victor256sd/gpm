@@ -106,7 +106,6 @@ if st.session_state.get('authentication_status'):
             elif Path(uploaded_file.name).suffix.lower() == ".csv":
                 df = pd.read_csv(uploaded_file)
             print(df)
-            st.stop()
             # Form input and query
             with st.form("doc_form", clear_on_submit=False):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
