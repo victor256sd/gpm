@@ -92,7 +92,7 @@ if st.session_state.get('authentication_status'):
     
     # Create advanced options dropdown with upload file option.
     with st.expander("Analysis Options", expanded=True):
-        doc_ex = st.checkbox("Upload Excel or csv file for mapping")
+        doc_ex = st.checkbox("Upload Excel or csv file for mapping", value=True)
                     
     # If the option to upload a document was selected, allow for an upload and then 
     # process it.
