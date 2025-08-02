@@ -27,7 +27,7 @@ def map_prep(df):
 
     key = st.secrets['INSTRUCTION_KEY'].encode()
     f = Fernet(key)
-    INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED.decode()
+    INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
     
     lat = pandas_ai(df, INSTRUCTION_LAT)
