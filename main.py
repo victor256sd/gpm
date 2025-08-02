@@ -117,7 +117,7 @@ if st.session_state.get('authentication_status'):
                     data = map_prep(df)
                     st.markdown(uploaded_file.name)
                     with st.spinner('Mapping...'):
-                        st.map(data,size=200)
+                        st.map(data,size=500)
 
 elif st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
