@@ -10,7 +10,8 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
-    
+import chardet
+
 # Disable the button called via on_click attribute.
 def disable_button():
     st.session_state.disabled = True        
@@ -107,8 +108,12 @@ if st.session_state.get('authentication_status'):
             if Path(uploaded_file.name).suffix.lower() == ".xlsx":            
                 df = pd.read_excel(uploaded_file, engine='openpyxl')
             elif Path(uploaded_file.name).suffix.lower() == ".csv":
-                df = pd.read_csv(uploaded_file)
-            print(df)
+                # If uploaded_file is a file-like object (e.g. from Streamlit's file_uploader)
+                rawdata = uploaded_file.read()
+                result = chardet.detect(rawdata)
+                encoding = result['encoding']
+                # Rewind and read with detected encoding
+                df = pd.read_csv(uploaded_file, encoding=encoding)                                
             # Form input and query
             with st.form("doc_form", clear_on_submit=False):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
