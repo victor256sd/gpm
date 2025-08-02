@@ -1,4 +1,3 @@
-chardet
 openpyxl
 pandas
 pandasai==0.2.2
