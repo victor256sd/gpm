@@ -111,9 +111,11 @@ if st.session_state.get('authentication_status'):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
                 if submit_doc_ex and doc_ex:
                     # Prep data for mapping and map.
-                    data = map_prep(df)
-                    st.title("Quickmap")
-                    st.map(data)
+                    print(df.head())
+                    
+                    # data = map_prep(df)
+                    # st.title("Quickmap")
+                    # st.map(data)
 
 elif st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
