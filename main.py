@@ -32,11 +32,8 @@ def map_prep(df):
 
     st.write(df.head())
     
-    lat = pandas_ai(df, INSTRUCTION_LAT)
-    lon = pandas_ai(df, INSTRUCTION_LON)
-
-    st.write(lat)
-    st.write(lon)
+    lat = pandas_ai(df, str(INSTRUCTION_LAT))
+    lon = pandas_ai(df, str(INSTRUCTION_LON))
     
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
@@ -116,7 +113,6 @@ if st.session_state.get('authentication_status'):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
                 if submit_doc_ex and doc_ex:
                     # Prep data for mapping and map.
-                    st.write(df.head())                    
                     data = map_prep(df)
                     st.title(uploaded_file.name)
                     st.map(data)
