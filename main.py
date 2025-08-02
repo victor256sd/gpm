@@ -30,7 +30,7 @@ def map_prep(df):
     INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
     INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
     
-    lat = pandas_llm(df, "Identify the column containing latitude coordinates")
+    lat = PandasAI.pandas_llm(df, "Identify the column containing latitude coordinates")
     lon = pandas_llm(df, INSTRUCTION_LON)
     
     # Sample data: Latitude and Longitude
