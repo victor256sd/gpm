@@ -32,14 +32,17 @@ def map_prep(df):
     
     lat = pandas_ai.run(df, prompt="What are the latitude coordinates?")
     lon = pandas_ai.run(df, prompt="What are the longitude coordinates?")
-
+    
     # Sample data: Latitude and Longitude
     data = pd.DataFrame({
         'lat': [lat],
         'lon': [lon]
     })
 
-    st.write(data)
+    rename_dict = {}
+    rename_dict[lat_col] = 'lat'
+    rename_dict[lon_col] = 'lon'
+    data = data.rename(columns=rename_dict)
     
     # Convert columns to numeric, forcing non-convertible values to NaN
     data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
@@ -48,7 +51,6 @@ def map_prep(df):
     # Drop rows where conversion failed (so we only keep real coordinates)
     data = data.dropna(subset=['lat', 'lon'])    
     
-    st.write(data)
     return data
 
 # Definitive CSS selectors for Streamlit 1.45.1+
