@@ -61,7 +61,7 @@ def map_prep(df):
         # )
         response = llm.completions.create(
             model=model,
-            prompt=INSTRUCTION + f"\nHere is the dataframe in JSON format: {df_json}")
+            prompt=INSTRUCTION + f"\nHere is the dataframe in JSON format: {df_json}"
         )
     
     return response
