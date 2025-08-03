@@ -53,12 +53,22 @@ def map_prep(df):
     df_json = df.to_json(orient="records")
     
     with st.spinner('Searching...'):
+        # response = llm.responses.create(
+        #     instructions = INSTRUCTION,
+        #     prompt = f"Here is the dataframe in json format: {df_json}",
+        #     model = model,
+        #     temperature = 0.6,
+        # )
         response = llm.responses.create(
-            instructions = INSTRUCTION,
-            prompt = f"Here is the dataframe in json format: {df_json}",
-            model = model,
-            temperature = 0.6,
+            instructions=INSTRUCTION,
+            messages=[
+                {"role": "system", "content": INSTRUCTION},
+                {"role": "user", "content": f"Here is the dataframe in JSON format: {df_json}"}
+            ],
+            model=model,
         )
+
+
     
     return response
 
