@@ -19,7 +19,7 @@ def disable_button():
 
 def map_prep(df):
     openai_api_key = st.secrets["OPENAI_API_KEY"]
-    llm = OpenAI(api_token=openai_api_key)
+    llm = OpenAI(api_key=openai_api_key)
     # pandas_ai = PandasAI(llm, conversational=False)
 
     # lat = []
