@@ -59,13 +59,9 @@ def map_prep(df):
         #     model = model,
         #     temperature = 0.6,
         # )
-        response = llm.ChatCompletion.create(
-            instructions=INSTRUCTION,
-            messages=[
-                {"role": "system", "content": INSTRUCTION},
-                {"role": "user", "content": f"Here is the dataframe in JSON format: {df_json}"}
-            ],
+        response = llm.completions.create(
             model=model,
+            prompt=INSTRUCTION + f"\nHere is the dataframe in JSON format: {df_json}")
         )
     
     return response
