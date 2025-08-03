@@ -1,6 +1,7 @@
+openai
 openpyxl
-pandas
-pandasai==0.2.2
+# pandas
+#pandasai==0.2.2
 pathlib
 streamlit
 streamlit-authenticator
