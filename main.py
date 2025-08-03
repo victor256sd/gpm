@@ -1,5 +1,7 @@
 import streamlit as st
 import streamlit_authenticator as stauth
+import openai
+from openai import OpenAI
 import os
 import pandas as pd
 import openpyxl
@@ -8,8 +10,8 @@ import yaml
 from yaml.loader import SafeLoader
 from pathlib import Path
 from cryptography.fernet import Fernet
-from pandasai import PandasAI
-from pandasai.llm.openai import OpenAI
+# from pandasai import PandasAI
+# from pandasai.llm.openai import OpenAI
 
 # Disable the button called via on_click attribute.
 def disable_button():
