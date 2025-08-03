@@ -49,10 +49,13 @@ def map_prep(df):
     
     # html_data_response = pandas_ai.run(df, prompt=INSTRUCTION)
 
+    # Convert DataFrame to JSON string
+    df_json = df.to_json(orient="records")
+    
     with st.spinner('Searching...'):
         response = llm.responses.create(
             instructions = INSTRUCTION,
-            prompt = f"Here is the dataframe: {df}",
+            prompt = f"Here is the dataframe in json format: {df_json}",
             model = model,
             temperature = 0.6,
         )
