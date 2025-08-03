@@ -134,7 +134,7 @@ if st.session_state.get('authentication_status'):
                 if submit_doc_ex and doc_ex:
                     # Prep data for mapping and map.
                     html_data_response = map_prep(df)
-                    html_data = html_data_response['choices'][0]['text'].strip() #.output[1].content[0].text
+                    html_data = html_data_response.choices[0].text.strip() #.output[1].content[0].text
                     # st.markdown(uploaded_file.name)
                     # with st.spinner('Mapping...'):
                     #     st.map(data)
