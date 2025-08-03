@@ -59,7 +59,7 @@ def map_prep(df):
         #     model = model,
         #     temperature = 0.6,
         # )
-        response = llm.responses.create(
+        response = llm.ChatCompletion.create(
             instructions=INSTRUCTION,
             messages=[
                 {"role": "system", "content": INSTRUCTION},
@@ -67,8 +67,6 @@ def map_prep(df):
             ],
             model=model,
         )
-
-
     
     return response
 
