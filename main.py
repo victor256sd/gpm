@@ -145,7 +145,7 @@ if st.session_state.get('authentication_status'):
                         window.open('{html_data}', '_blank');
                     </script>
                     """
-
+                    st.write(html_data)
                     st.markdown(html_code, unsafe_allow_html=True)
 
 elif st.session_state.get('authentication_status') is False:
