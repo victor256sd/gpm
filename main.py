@@ -1,7 +1,10 @@
 import streamlit as st
 import streamlit_authenticator as stauth
-# import openai
-# from openai import OpenAI
+import openai
+from openai import OpenAI
+from openai import AsyncOpenAI
+from agents import Agent, ItemHelpers, MessageOutputItem, Runner, FileSearchTool, function_tool, trace
+import asyncio
 import os
 import pandas as pd
 import openpyxl
@@ -10,8 +13,74 @@ import yaml
 from yaml.loader import SafeLoader
 from pathlib import Path
 from cryptography.fernet import Fernet
-from pandasai import PandasAI
-from pandasai.llm.openai import OpenAI
+# from pandasai import PandasAI
+# from pandasai.llm.openai import OpenAI
+
+# Wait until run process completion.
+def wait_on_run(client, run, thread):
+    while run.status == "queued" or run.status == "in_progress":
+        run = client.beta.threads.runs.retrieve(
+            thread_id=thread.id,
+            run_id=run.id,
+        )
+        time.sleep(0.5)
+    return run
+
+# Retrieve messages from the thread, including message added by the assistant.
+def get_response(client, thread):
+    return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
+
+# Start client, thread, create file and add it to the openai vector store, update an
+# existing openai assistant with the new vector store, create a run to have the 
+# assistant process the vector store.
+def generate_response(filename, openai_api_key, model, assistant_id, query_text):    
+    # Check file existence.
+    if filename is not None:
+        # Start client, thread.
+        client = OpenAI(api_key=openai_api_key)
+        thread = client.beta.threads.create()
+        # Start thread.
+        client.beta.threads.messages.create(
+            thread_id=thread.id, role="user", content=query_text
+        )
+        
+        # Create file at openai storage from the uploaded file.
+        file = client.files.create(
+            file=open(filename, "rb"),
+            purpose="assistants"
+        )
+        
+        # Create vector store for processing by assistant.
+        vector_store = client.vector_stores.create(
+            name="aitam"
+        )
+        # Obtain vector store and file ids.
+        TMP_VECTOR_STORE_ID = str(vector_store.id)
+        TMP_FILE_ID = str(file.id)
+        # Add the file to the vector store.
+        batch_add = client.vector_stores.file_batches.create(
+            vector_store_id=TMP_VECTOR_STORE_ID,
+            file_ids=[TMP_FILE_ID]
+        )        
+        # Update Assistant, pointed to the vector store.
+        assistant = client.beta.assistants.update(
+            assistant_id,
+            tools=[{"type": "file_search"}],
+            tool_resources={
+                "file_search":{
+                    "vector_store_ids": [TMP_VECTOR_STORE_ID]
+                }
+            }
+        )
+        # Create a run to have assistant process the vector store file.
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant_id,
+        )
+        # Wait on the run to complete, then retrieve messages from the thread.
+        run = wait_on_run(client, run, thread)
+        messages = get_response(client, thread)
+    return messages, TMP_FILE_ID, TMP_VECTOR_STORE_ID, client, run, thread
 
 # Disable the button called via on_click attribute.
 def disable_button():
@@ -20,35 +89,59 @@ def disable_button():
 def map_prep(df):
     openai_api_key = st.secrets["OPENAI_API_KEY"]
     llm = OpenAI(api_key=openai_api_key)
-    pandas_ai = PandasAI(llm, conversational=False)
-
-    INSTRUCTION_LAT_ENCRYPTED = b'gAAAAABojm_FmESpDPXz3RA7rBg67IT8YfH7VG8m0f5abuXoNuG1H_8UT5cM61bux5AcXHiUcYLAc79JeaUBktuUB6PoHbc8KVxcJ1fDvNYtns8bpdwOjYzEZnrbmJZUH5_8X2NSA8igVZka8zGlJUlo88Tm6MMm8hYM397N3LzlIUFethM51Zg='
-    INSTRUCTION_LON_ENCRYPTED = b'gAAAAABojnADPUr62ZYbYBRhlhulPG0Gb68xaWluZjcF-P2Og2jqfO-EvArqjlF9wZvaJTCjZmd-YIKpOoNGugTdzt007M9AsLEMWDmsrhfneWP299XmFedu4aeULPd-T7KRiYNOMT9FNs6jSubgj-22-VdGQbhMTzpwKD_WZpVOZluXBAsg6Hs='
-
-    key = st.secrets['INSTRUCTION_KEY'].encode()
-    f = Fernet(key)
-    INSTRUCTION_LAT = f.decrypt(INSTRUCTION_LAT_ENCRYPTED).decode()
-    INSTRUCTION_LON = f.decrypt(INSTRUCTION_LON_ENCRYPTED).decode()
-    
-    lat = pandas_ai.run(df, prompt=INSTRUCTION_LAT)
-    lon = pandas_ai.run(df, prompt=INSTRUCTION_LON)
-
-    data = pd.DataFrame({'lat': lat, 'lon': lon})
-    
-    # Convert columns to numeric, forcing non-convertible values to NaN
-    data['lat'] = pd.to_numeric(data['lat'], errors='coerce')
-    data['lon'] = pd.to_numeric(data['lon'], errors='coerce')
-    
-    # Drop rows where conversion failed (so we only keep real coordinates)
-    data = data.dropna(subset=['lat', 'lon'])    
-    
-    # INSTRUCTION_ENCRYPTED = b'gAAAAABojuL8uRW7W3PblXfiH99IXGswYnYKDqYw6Os7dQslwFGh-fh52N_5cr40htRfvLAPcWg5r1yHZCwNhT8OGpiCYOF5maz1Xp2Ar4mdbWs5BRWy75plrjPdZGAUQ-TCc8m3aizQhwOHRBXes79p79_JqEilgW4PPplf9N1ZL_OVZb4mmiivArC_fX5ga1AkEvgXbvGePNX7M2rtvQBa23aebn5PVSFBrNR45McY87994azDrKy5iSaD6nBkUNjObZEbaeH6M9ib2EtfUtT9Zkq9PYytZ3-z8wl_esObblFsOW0zp_VWhTY47idsSZR-Ahhf4WZ4aoWerCLNEwmFxw0xABd1ZCP1jQZoJtLx71Ufy7WNeacxPyXRNQY-cH2xHmwHYhx9U68IOBlwgj5sb9o5t5qPwwGDBCV74MjhtXRhHySwfjRwDqHK5p_QRE0mvd7Q0hiTi7GVGwphvfjPnn93Gyn-wNwEIBGiPHdmLrr2z79oKDnxNxCBL71kWRe9uBtOxeHzQOrDYepqYdn1-pXBgWGNfg6y6MjTPN1P1e633CNOLGgwAsk-mI9oLsLtecgEaa183YzuV0YSNZLov5-vmtKnEVet1nfUs_g2vWR_NJoJRYGJaury7FRKmMwSCkEbRjD7iWCdijQgvufukE8OokAALkiX9t0RV-JhiwGqeZHsaKhUE_nGKushBdIa5-i7tgACEsT2zmiiri9V2KdnqkBlTSQBhxMatse3WkEHPjEEKVh4oSP86sl-r6IgCMH43HV9_FYwvAb8Y3fLLkXullMnssH0sPtm98jZG1F4V1-B9j5fwiH6CwecC0RQs4FsfZ6ZFBPIPEMPw5rKvBCFcExao0GAoOUhzfbzWUdtx-UuCm8QGtWtWoLpWSo6EwyGGFEWVFV2B68x0tX2hpcoP2hv8Lizo1MVUYaej8gfEXnZWqonRxYvU3UsJ-tlTu3hHgfH_e5K22FNwDa5WZ9BPj83EYfe9Kp8cpYnT0iy7Ps4dhHM9jos_DczOJEcLeVrElmvLeWgiNNoZrP6SRPwBq6P-ztkgtQvPH3cVlOjf7Lv5L5ojug1qNGHYKz67PqzfKVYD9515dT1yG3Z7yujlBMOHKDxCoPH6Fppr1OAAB1OjHaymQnvEymtUAhBGNUl10-wkz_GVz-LV0djOXk4PIX8eU4XpUNf4wue9p3X0REvyqddPdi9gO6uaJ1MZgHAzCTPX6egQkUYqjJmrfMMVauSMO9KNqaIH-Utbf4n9IAm49ATyb1d6CzrAPwid_-0GAFGZieoW7aPSEI20Unf_CDoJBjp9sC1IbZ7ENAItr3g9pcE4HbSBfHrZI43Kl8hcJZbkCIxk3Qy9ikw4S6pG--ao5qJ6yp00_WywmNkIFkL9fW6YJOcCtJw5OMqs4VP5lXx-A_15y3zNW-Nw7CRMkV-nchj_60mXemSy0sAKvLDHJY-ACgpm5uCECoSSVBgp5CbnpBZ2N7Cfvde6y3WYGrWhgQKn5BCdsK4oa_pPL1FagVGk4HBP8CHTYAVexWw6E6KA3CL1gn2gASyczGqFi2dOOOcPciqGIHj2RfHj53d-uIcuytUmy52YUrTPT4RSNv09o_CCjFLfKx2FAlqqIZgpfvFXhrRHof0CncbFSBEe2pO374ze9u7YB-bXWq-Um9-7OF--xnqQDN4fvNuddqCJaGxLuJndMop6KFd_JHFNZUHy_XN5ZQcnUr81uidHZUEsH6X0B9lHn6bPeIpHHF_NcaDfmg4idCQgt4ko4bgEAMj1637TW72tF8kCmFbj7FKa-xNyOP27Et02F9tSk5zT2VpdZzaEGkmWJxMiT_LvcyAE-8BBuK_6zbMwEDIVqzzK3w8XV859_HxcqO-1IrE_r-iOr60L5u4nQF8IPaBKuOUjlzODQjZcn0F0Bxc8r0Q1VzLfmi98xC42_WpfErBNzhH_uniZhq-BthzCG_d6BcapnPqkZ-5I58k7dwnXsqOCIB6DArgnPy3tlLWUkfu-qnT4S_ISdPlcYNJsCvgJt_EsUJUST7TLzU1vSRAbmif79maS1epVtM1i5N_0ft3b2IyRIssMkjAwV4xNFLSX6446Q8sFxkZ3uY28U-aHljTWXq32Fz4wZqaiFTBolsmoIiw4paLdeYqgFZ2HB0yDFUbBvz5rhfnK9wD18kA98f7-Zj9JCSyHN9s0YziYxh5705fVFbwETV3NYMY29yHLCWO704HwBnK-wsvp9j-xZaVXyinj85rK1_PIE7j3kW-zST9RTw-f0l-zZHoYh_LFqD1kfFmBw23eDz-O44Y_-kyjCKVNs2fs05nVDwN52h2UlDJBluX4FgWJx_l7Ubi-P39DcyJgWZk1mkrO7xpBHE1qJyA-HyRz5MukykV2zZc9dZqTeOGargJqVHQCAtU9LbCLJiVKnshi3b2TeU9CnrO'
-    # INSTRUCTION = f.decrypt(INSTRUCTION_ENCRYPTED).decode()
-    
-    # html_data_response = pandas_ai.run(df, prompt=INSTRUCTION)
+    thread = llm.beta.threads.create()
 
     # Convert DataFrame to JSON string
-    # df_json = df.to_json(orient="records")
+    df_json = df.to_json(orient="records")
+
+    filename = "df.json"
+    # Writing JSON data to a file
+    with open(filename, "w") as json_file:
+        json.dump(df_json, json_file, indent=4)  
+    json_file.close()
+
+    # Start thread.
+    client.beta.threads.messages.create(
+        thread_id=thread.id, role="user", content=query_text
+    )
+    
+    # Create file at openai storage from the uploaded file.
+    file = client.files.create(
+        file=open(filename, "rb"),
+        purpose="assistants"
+    )
+    
+    # Create vector store for processing by assistant.
+    vector_store = client.vector_stores.create(
+        name="fastmap-temp"
+    )
+    # Obtain vector store and file ids.
+    TMP_VECTOR_STORE_ID = str(vector_store.id)
+    TMP_FILE_ID = str(file.id)
+    # Add the file to the vector store.
+    batch_add = client.vector_stores.file_batches.create(
+        vector_store_id=TMP_VECTOR_STORE_ID,
+        file_ids=[TMP_FILE_ID]
+    )        
+
+    # Update Assistant, pointed to the vector store.
+    assistant = client.beta.assistants.update(
+        assistant_id,
+        tools=[{"type": "file_search"}],
+        tool_resources={
+            "file_search":{
+                "vector_store_ids": [TMP_VECTOR_STORE_ID]
+            }
+        }
+    )
+    # Create a run to have assistant process the vector store file.
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant_id,
+    )
+    # Wait on the run to complete, then retrieve messages from the thread.
+    run = wait_on_run(client, run, thread)
+    messages = get_response(client, thread)
     
     # with st.spinner('Searching...'):
     #     # response = llm.responses.create(
@@ -130,21 +223,40 @@ if st.session_state.get('authentication_status'):
             with st.form("doc_form", clear_on_submit=False):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
                 if submit_doc_ex and doc_ex:
-                    # Prep data for mapping and map.
-                    data = map_prep(df)
-                    # html_data = html_data_response.choices[0].text.strip() #.output[1].content[0].text
-                    st.markdown(uploaded_file.name)
-                    with st.spinner('Mapping...'):
-                        st.map(data)
+
+                    query_text = "I need your help analyzing the uploaded document."
+                    # Call function to copy file to openai storage, create vector store, and use an 
+                    # assistant to eval the file.
+                    with st.spinner('Calculating...'):
+                        # Prep data for mapping and map.
+                        data = map_prep(df)
+                    # Write disclaimer and response from assistant eval of file.
+                    st.write("*As the Threat AI system continues to be refined. Users should review the original file and verify the summary for reliability and relevance.*")
+                    st.write("#### Summary")
+                    i = 0
+                    for m in response:
+                        if i > 0:
+                            st.markdown(m.content[0].text.value)
+                        i += 1
+                    # Reset the button state for standard aitam file eval, and 
+                    # delete the file from openai storage and the associated
+                    # vector store.
+                    submit_doc_ex = False
+                    delete_vectors(client, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
                     
-                    # # Use custom HTML and JavaScript to open the file
-                    # html_code = f"""
-                    # <script>
-                    #     window.open('{html_data}', '_blank');
-                    # </script>
-                    # """
-                    # st.write(html_data)
-                    # st.markdown(html_code, unsafe_allow_html=True)
+                    # # html_data = html_data_response.choices[0].text.strip() #.output[1].content[0].text
+                    # st.markdown(uploaded_file.name)
+                    # with st.spinner('Mapping...'):
+                    #     st.map(data)
+                    
+                    # Use custom HTML and JavaScript to open the file
+                    html_code = f"""
+                    <script>
+                        window.open('{html_data}', '_blank');
+                    </script>
+                    """
+                    st.write(html_data)
+                    st.markdown(html_code, unsafe_allow_html=True)
 
 elif st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
