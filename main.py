@@ -88,6 +88,8 @@ def disable_button():
 
 def map_prep(df):
     openai_api_key = st.secrets["OPENAI_API_KEY"]
+    assistant_id = st.secrets["MATH_ASSISTANT_ID"]
+
     llm = OpenAI(api_key=openai_api_key)
     thread = llm.beta.threads.create()
 
@@ -150,6 +152,7 @@ def map_prep(df):
             html_data.append(m.content[0].text.value)
         i += 1
     
+    delete_vectors(llm, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
     return html_data
 
 # Definitive CSS selectors for Streamlit 1.45.1+
@@ -218,22 +221,11 @@ if st.session_state.get('authentication_status'):
             with st.form("doc_form", clear_on_submit=False):
                 submit_doc_ex = st.form_submit_button("Map", on_click=disable_button)
                 if submit_doc_ex and doc_ex:
-
-                    query_text = "I need your help analyzing the uploaded document."
                     # Call function to copy file to openai storage, create vector store, and use an 
                     # assistant to eval the file.
                     with st.spinner('Calculating...'):
                         # Prep data for mapping and map.
-                        data = map_prep(df)
-                    # Write disclaimer and response from assistant eval of file.
-                    st.write("*As the Threat AI system continues to be refined. Users should review the original file and verify the summary for reliability and relevance.*")
-                    st.write("#### Summary")
-
-                    # Reset the button state for standard aitam file eval, and 
-                    # delete the file from openai storage and the associated
-                    # vector store.
-                    submit_doc_ex = False
-                    delete_vectors(client, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
+                        html_data = map_prep(df)
                     
                     # # html_data = html_data_response.choices[0].text.strip() #.output[1].content[0].text
                     # st.markdown(uploaded_file.name)
