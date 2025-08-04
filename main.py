@@ -94,8 +94,8 @@ def map_prep(df):
         assistant_id=assistant_id,
     )
     # Wait on the run to complete, then retrieve messages from the thread.
-    run = wait_on_run(client, run, thread)
-    messages = get_response(client, thread)
+    run = wait_on_run(llm, run, thread)
+    messages = get_response(llm, thread)
     
     i = 0
     html_data = ""
