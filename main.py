@@ -30,62 +30,13 @@ def wait_on_run(client, run, thread):
 def get_response(client, thread):
     return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
-# Start client, thread, create file and add it to the openai vector store, update an
-# existing openai assistant with the new vector store, create a run to have the 
-# assistant process the vector store.
-def generate_response(filename, openai_api_key, model, assistant_id, query_text):    
-    # Check file existence.
-    if filename is not None:
-        # Start client, thread.
-        client = OpenAI(api_key=openai_api_key)
-        thread = client.beta.threads.create()
-        # Start thread.
-        client.beta.threads.messages.create(
-            thread_id=thread.id, role="user", content=query_text
-        )
-        
-        # Create file at openai storage from the uploaded file.
-        file = client.files.create(
-            file=open(filename, "rb"),
-            purpose="assistants"
-        )
-        
-        # Create vector store for processing by assistant.
-        vector_store = client.vector_stores.create(
-            name="aitam"
-        )
-        # Obtain vector store and file ids.
-        TMP_VECTOR_STORE_ID = str(vector_store.id)
-        TMP_FILE_ID = str(file.id)
-        # Add the file to the vector store.
-        batch_add = client.vector_stores.file_batches.create(
-            vector_store_id=TMP_VECTOR_STORE_ID,
-            file_ids=[TMP_FILE_ID]
-        )        
-        # Update Assistant, pointed to the vector store.
-        assistant = client.beta.assistants.update(
-            assistant_id,
-            tools=[{"type": "file_search"}],
-            tool_resources={
-                "file_search":{
-                    "vector_store_ids": [TMP_VECTOR_STORE_ID]
-                }
-            }
-        )
-        # Create a run to have assistant process the vector store file.
-        run = client.beta.threads.runs.create(
-            thread_id=thread.id,
-            assistant_id=assistant_id,
-        )
-        # Wait on the run to complete, then retrieve messages from the thread.
-        run = wait_on_run(client, run, thread)
-        messages = get_response(client, thread)
-    return messages, TMP_FILE_ID, TMP_VECTOR_STORE_ID, client, run, thread
-
 # Disable the button called via on_click attribute.
 def disable_button():
     st.session_state.disabled = True        
 
+# Start client, thread, create file and add it to the openai vector store, update an
+# existing openai assistant with the new vector store, create a run to have the 
+# assistant process the vector store.
 def map_prep(df):
     openai_api_key = st.secrets["OPENAI_API_KEY"]
     assistant_id = st.secrets["MATH_ASSISTANT_ID"]
