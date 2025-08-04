@@ -99,11 +99,13 @@ def map_prep(df):
     messages = get_response(llm, thread)
     
     i = 0
+    html_chunks = []
     html_data = ""
     for m in messages:
         if i > 0:
-            html_data.append(m.content[0].text.value)
+            html_chunks.append(m.content[0].text.value)
         i += 1
+    html_data = "".join(html_chunks)
     
     delete_vectors(llm, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
     return html_data
