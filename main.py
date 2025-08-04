@@ -161,8 +161,8 @@ if st.session_state.get('authentication_status'):
     # MATH_ASSISTANT2_ID = st.secrets["MATH_ASSISTANT2_ID"]
     
     # Set page layout and title.
-    st.set_page_config(page_title="Fastmap", page_icon=":globe_with_meridians:", layout="wide")
-    st.header(":globe_with_meridians: Fastmap")
+    st.set_page_config(page_title="Fastmap Pro", page_icon=":globe_with_meridians:", layout="wide")
+    st.header(":globe_with_meridians: Fastmap Pro")
         
     # Retrieve user-selected openai model.
     model: str = st.selectbox("Model", options=MODEL_LIST)
