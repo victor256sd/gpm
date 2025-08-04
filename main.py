@@ -55,31 +55,31 @@ def map_prep(df):
     json_file.close()
 
     # Start thread.
-    client.beta.threads.messages.create(
+    llm.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=query_text
     )
     
     # Create file at openai storage from the uploaded file.
-    file = client.files.create(
+    file = llm.files.create(
         file=open(filename, "rb"),
         purpose="assistants"
     )
     
     # Create vector store for processing by assistant.
-    vector_store = client.vector_stores.create(
+    vector_store = llm.vector_stores.create(
         name="fastmap-temp"
     )
     # Obtain vector store and file ids.
     TMP_VECTOR_STORE_ID = str(vector_store.id)
     TMP_FILE_ID = str(file.id)
     # Add the file to the vector store.
-    batch_add = client.vector_stores.file_batches.create(
+    batch_add = llm.vector_stores.file_batches.create(
         vector_store_id=TMP_VECTOR_STORE_ID,
         file_ids=[TMP_FILE_ID]
     )        
 
     # Update Assistant, pointed to the vector store.
-    assistant = client.beta.assistants.update(
+    assistant = llm.beta.assistants.update(
         assistant_id,
         tools=[{"type": "file_search"}],
         tool_resources={
@@ -89,7 +89,7 @@ def map_prep(df):
         }
     )
     # Create a run to have assistant process the vector store file.
-    run = client.beta.threads.runs.create(
+    run = llm.beta.threads.runs.create(
         thread_id=thread.id,
         assistant_id=assistant_id,
     )
