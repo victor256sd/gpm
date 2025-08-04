@@ -143,19 +143,14 @@ def map_prep(df):
     run = wait_on_run(client, run, thread)
     messages = get_response(client, thread)
     
-    # with st.spinner('Searching...'):
-    #     # response = llm.responses.create(
-    #     #     instructions = INSTRUCTION,
-    #     #     prompt = f"Here is the dataframe in json format: {df_json}",
-    #     #     model = model,
-    #     #     temperature = 0.6,
-    #     # )
-    #     response = llm.completions.create(
-    #         model=model,
-    #         prompt=INSTRUCTION + f"\nHere is the dataframe in JSON format: {df_json}"
-    #     )
+    i = 0
+    html_data = ""
+    for m in messages:
+        if i > 0:
+            html_data.append(m.content[0].text.value)
+        i += 1
     
-    return data
+    return html_data
 
 # Definitive CSS selectors for Streamlit 1.45.1+
 st.markdown("""
@@ -233,11 +228,7 @@ if st.session_state.get('authentication_status'):
                     # Write disclaimer and response from assistant eval of file.
                     st.write("*As the Threat AI system continues to be refined. Users should review the original file and verify the summary for reliability and relevance.*")
                     st.write("#### Summary")
-                    i = 0
-                    for m in response:
-                        if i > 0:
-                            st.markdown(m.content[0].text.value)
-                        i += 1
+
                     # Reset the button state for standard aitam file eval, and 
                     # delete the file from openai storage and the associated
                     # vector store.
