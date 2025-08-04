@@ -35,6 +35,17 @@ def get_response(client, thread):
 def disable_button():
     st.session_state.disabled = True        
 
+# Delete file in openai storage and the vector store.
+def delete_vectors(client, TMP_FILE_ID, TMP_VECTOR_STORE_ID):
+    # Delete the file and vector store
+    deleted_vector_store_file = client.vector_stores.files.delete(
+        vector_store_id=TMP_VECTOR_STORE_ID,
+        file_id=TMP_FILE_ID
+    )
+    deleted_vector_store = client.vector_stores.delete(
+        vector_store_id=TMP_VECTOR_STORE_ID
+    )
+
 # Start client, thread, create file and add it to the openai vector store, update an
 # existing openai assistant with the new vector store, create a run to have the 
 # assistant process the vector store.
