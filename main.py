@@ -32,16 +32,11 @@ def get_response(client, thread):
     return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
 def get_file_ids_from_thread(messages):
-    file_ids = []
-
     file_ids = [
         attachment.file_id
         for m in messages
         for attachment in m.attachments
     ]
-
-    st.write(file_ids)
-
     return file_ids
 
 # # Write Each File ID's Contents with Separator Implementation for Readability
