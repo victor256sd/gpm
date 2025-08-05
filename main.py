@@ -145,7 +145,7 @@ def map_prep(df):
     #     write_file(file_id, count) # Write file ID contents
     #     print(Fore.GREEN + f'File {count + 1} written.\n')
 
-    folium_data = client.files.content(file_ids[0])
+    folium_data = llm.files.content(file_ids[0])
     folium_data_bytes = image_data.read()
         
     i = 0
