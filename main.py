@@ -35,7 +35,7 @@ def get_file_ids_from_thread(client, thread):
     file_ids = [
         file_id
         for m in get_response(client, thread)
-        for file_id in m.file_ids
+        for file_id in m.file_id
     ]
     return file_ids
 
