@@ -137,7 +137,7 @@ def map_prep(df):
 
     # Iterate through the File IDs while Calling write_file for File Output
     file_ids = []
-    file_ids = get_file_ids_from_thread(thread.id) # Retrieve file IDs
+    file_ids = get_file_ids_from_thread(thread) # Retrieve file IDs
     # print('\nFILE IDS: ', file_ids)
     # print('\nNUMBER OF FILE IDS: ', len(file_ids))
     # for count, file_id in enumerate(file_ids):
