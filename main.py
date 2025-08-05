@@ -66,7 +66,7 @@ def map_prep(df):
     json_file.close()
 
     # Start thread.
-    query_text = "Use assistant to analyze and generate html based on instructions and provided dataframe data in json format."
+    query_text = "Use assistant to analyze and generate an html file based on instructions and provided dataframe data in json format."
     llm.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=query_text
     )
