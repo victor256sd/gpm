@@ -35,7 +35,7 @@ def get_file_ids_from_thread(messages):
     file_ids = [
         file_id
         for m in messages
-        for file_id in m.annotations
+        for file_id in m.attachments
     ]
     return file_ids
 
