@@ -31,10 +31,10 @@ def wait_on_run(client, run, thread):
 def get_response(client, thread):
     return client.beta.threads.messages.list(thread_id=thread.id, order="asc")
 
-def get_file_ids_from_thread(client, thread):
+def get_file_ids_from_thread(messages):
     file_ids = [
         file_id
-        for m in get_response(client, thread)
+        for m in messages
         for file_id in m.file_id
     ]
     return file_ids
@@ -137,7 +137,7 @@ def map_prep(df):
 
     # Iterate through the File IDs while Calling write_file for File Output
     file_ids = []
-    file_ids = get_file_ids_from_thread(llm, thread) # Retrieve file IDs
+    file_ids = get_file_ids_from_thread(messages) # Retrieve file IDs
     # print('\nFILE IDS: ', file_ids)
     # print('\nNUMBER OF FILE IDS: ', len(file_ids))
     # for count, file_id in enumerate(file_ids):
