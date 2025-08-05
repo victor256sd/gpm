@@ -136,7 +136,8 @@ def map_prep(df):
     messages = get_response(llm, thread)
 
     # Iterate through the File IDs while Calling write_file for File Output
-    file_ids = get_file_ids_from_thread(thread_id) # Retrieve file IDs
+    file_ids = []
+    file_ids = get_file_ids_from_thread(thread.id) # Retrieve file IDs
     # print('\nFILE IDS: ', file_ids)
     # print('\nNUMBER OF FILE IDS: ', len(file_ids))
     # for count, file_id in enumerate(file_ids):
@@ -146,21 +147,18 @@ def map_prep(df):
 
     folium_data = client.files.content(file_ids[0])
     folium_data_bytes = image_data.read()
-    
-    with open("./folium_map.html", "wb") as file:
-        file.write(folium_data_bytes)
-    
+        
     i = 0
-    html_chunks = []
-    html_data = ""
+    msg_chunks = []
+    msg_data = ""
     for m in messages:
         if i > 0:
-            html_chunks.append("\n", m.content[0].text.value)
+            msg_chunks.append("\n", m.content[0].text.value)
         i += 1
-    html_data = "".join(html_chunks)
+    msg_data = "".join(msg_chunks)
     
     # delete_vectors(llm, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
-    return html_data
+    return msg_data, folium_data_bytes
 
 # Definitive CSS selectors for Streamlit 1.45.1+
 st.markdown("""
@@ -232,20 +230,23 @@ if st.session_state.get('authentication_status'):
                     # assistant to eval the file.
                     with st.spinner('Calculating...'):
                         # Prep data for mapping and map.
-                        html_data = map_prep(df)
+                        msg_data, folium_data_bytes = map_prep(df)
                     
                     # # html_data = html_data_response.choices[0].text.strip() #.output[1].content[0].text
                     # st.markdown(uploaded_file.name)
                     # with st.spinner('Mapping...'):
                     #     st.map(data)
                     
+                    with open("./folium_map.html", "wb") as file:
+                        file.write(folium_data_bytes)
+
                     # Use custom HTML and JavaScript to open the file
                     html_code = f"""
                     <script>
-                        window.open('{html_data}', '_blank');
+                        window.open('folium_map.html', '_blank');
                     </script>
                     """
-                    st.write(html_data)
+                    st.write(msg_data)
                     st.markdown(html_code, unsafe_allow_html=True)
 
 elif st.session_state.get('authentication_status') is False:
