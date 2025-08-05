@@ -137,19 +137,25 @@ def map_prep(df):
 
     # Iterate through the File IDs while Calling write_file for File Output
     file_ids = get_file_ids_from_thread(thread_id) # Retrieve file IDs
-    print('\nFILE IDS: ', file_ids)
-    print('\nNUMBER OF FILE IDS: ', len(file_ids))
-    for count, file_id in enumerate(file_ids):
-        print(Fore.GREEN + f'\nWriting file #{count + 1}...\n')
-        write_file(file_id, count) # Write file ID contents
-        print(Fore.GREEN + f'File {count + 1} written.\n')
+    # print('\nFILE IDS: ', file_ids)
+    # print('\nNUMBER OF FILE IDS: ', len(file_ids))
+    # for count, file_id in enumerate(file_ids):
+    #     print(Fore.GREEN + f'\nWriting file #{count + 1}...\n')
+    #     write_file(file_id, count) # Write file ID contents
+    #     print(Fore.GREEN + f'File {count + 1} written.\n')
+
+    folium_data = client.files.content(file_ids[0])
+    folium_data_bytes = image_data.read()
+    
+    with open("./folium_map.html", "wb") as file:
+        file.write(folium_data_bytes)
     
     i = 0
     html_chunks = []
     html_data = ""
     for m in messages:
         if i > 0:
-            html_chunks.append(m.content[0].text.value)
+            html_chunks.append("\n", m.content[0].text.value)
         i += 1
     html_data = "".join(html_chunks)
     
