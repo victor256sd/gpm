@@ -77,28 +77,34 @@ def map_prep(df):
         purpose="assistants"
     )
     
-    # Create vector store for processing by assistant.
-    vector_store = llm.vector_stores.create(
-        name="fastmap-temp"
-    )
-    # Obtain vector store and file ids.
-    TMP_VECTOR_STORE_ID = str(vector_store.id)
-    TMP_FILE_ID = str(file.id)
-    # Add the file to the vector store.
-    batch_add = llm.vector_stores.file_batches.create(
-        vector_store_id=TMP_VECTOR_STORE_ID,
-        file_ids=[TMP_FILE_ID]
-    )        
+    # # Create vector store for processing by assistant.
+    # vector_store = llm.vector_stores.create(
+    #     name="fastmap-temp"
+    # )
+    # # Obtain vector store and file ids.
+    # TMP_VECTOR_STORE_ID = str(vector_store.id)
+    # TMP_FILE_ID = str(file.id)
+    # # Add the file to the vector store.
+    # batch_add = llm.vector_stores.file_batches.create(
+    #     vector_store_id=TMP_VECTOR_STORE_ID,
+    #     file_ids=[TMP_FILE_ID]
+    # )        
 
     # Update Assistant, pointed to the vector store.
     assistant = llm.beta.assistants.update(
         assistant_id,
-        tools=[{"type": "file_search"}],
+        tools=[{"type": "code_interpreter"}],
         tool_resources={
-            "file_search":{
-                "vector_store_ids": [TMP_VECTOR_STORE_ID]
+            "code_interpreter": {
+              "file_ids": [file.id]
             }
         }
+        # tools=[{"type": "file_search"}],
+        # tool_resources={
+        #     "file_search":{
+        #         "vector_store_ids": [TMP_VECTOR_STORE_ID]
+        #     }
+        # }
     )
     # Create a run to have assistant process the vector store file.
     run = llm.beta.threads.runs.create(
@@ -118,7 +124,7 @@ def map_prep(df):
         i += 1
     html_data = "".join(html_chunks)
     
-    delete_vectors(llm, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
+    # delete_vectors(llm, TMP_FILE_ID, TMP_VECTOR_STORE_ID)
     return html_data
 
 # Definitive CSS selectors for Streamlit 1.45.1+
