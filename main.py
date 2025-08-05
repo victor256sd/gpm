@@ -33,10 +33,14 @@ def get_response(client, thread):
 
 def get_file_ids_from_thread(messages):
     file_ids = []
-    for m in messages:
-        for attachment in m.attachments:
-            file_ids.append(attachment["file_id"])
-            # st.write(attachment)
+
+    file_ids = [
+        attachment.file_id
+        for m in messages
+        for attachment in m.attachments
+    ]
+
+    st.write(file_ids)
 
     return file_ids
 
