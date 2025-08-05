@@ -158,7 +158,7 @@ def map_prep(df):
     msg_data = ""
     for m in messages:
         if i > 0:
-            msg_chunks.append("\n", m.content[0].text.value)
+            msg_chunks.append("\n" + m.content[0].text.value)
         i += 1
     msg_data = "".join(msg_chunks)
     
