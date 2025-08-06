@@ -237,17 +237,27 @@ if st.session_state.get('authentication_status'):
                     # with st.spinner('Mapping...'):
                     #     st.map(data)
                     
-                    with open("./folium_map.html", "wb") as file:
-                        file.write(folium_data_bytes)
+                    # with open("./folium_map.html", "wb") as file:
+                    #     file.write(folium_data_bytes)
 
-                    # Use custom HTML and JavaScript to open the file
-                    html_code = f"""
-                    <script>
-                        window.open('folium_map.html', '_blank');
-                    </script>
-                    """
+                    # # Use custom HTML and JavaScript to open the file
+                    # html_code = f"""
+                    # <script>
+                    #     window.open('folium_map.html', '_blank');
+                    # </script>
+                    # """
                     st.write(msg_data)
-                    st.markdown(html_code, unsafe_allow_html=True)
+                    # st.markdown(html_code, unsafe_allow_html=True)
+
+                    # Provide a download button
+                    st.download_button(
+                        label="Download Map",
+                        data=folium_data_bytes,
+                        file_name="folium_map.html",
+                        mime="html",
+                        on_click="ignore",
+                        type="primary"
+                    )
 
 elif st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
