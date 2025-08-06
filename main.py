@@ -145,9 +145,12 @@ def map_prep(df):
     #     write_file(file_id, count) # Write file ID contents
     #     print(Fore.GREEN + f'File {count + 1} written.\n')
 
-    folium_data = llm.files.content(file_ids[0])
-    folium_data_bytes = folium_data.read()
-        
+    try:
+        folium_data = llm.files.content(file_ids[0])
+        folium_data_bytes = folium_data.read()
+    except:
+        folium_data_bytes = ""
+    
     i = 0
     msg_chunks = []
     msg_data = ""
